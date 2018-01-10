@@ -1,0 +1,152 @@
+DELETE
+FROM candidatos
+WHERE
+  DESCRICAO_CARGO = 'VOCÊ É A FAVOR | DA CRIAÇÃO DO MUNICÍPIO DE | EXTREMA DE RONDÔNIA?' OR
+  DESCRICAO_CARGO = 'VOCÊ É A FAVOR DA | ALTERAÇÃO DO NOME | DA CIDADE DE EMBU | PARA EMBU DAS ARTES ?';
+
+UPDATE candidatos
+SET DESCRICAO_CARGO = 'VICE-PREFEITO'
+WHERE DESCRICAO_CARGO = 'VICE PREFEITO';
+
+UPDATE candidatos
+SET DESCRICAO_CARGO = '1º SUPLENTE'
+WHERE DESCRICAO_CARGO = '1º SUPLENTE SENADOR';
+
+UPDATE candidatos
+SET DESCRICAO_CARGO = '2º SUPLENTE'
+WHERE DESCRICAO_CARGO = '2º SUPLENTE SENADOR';
+
+UPDATE receitas_candidatos
+SET cargo = 'VICE-PREFEITO'
+WHERE cargo = 'VICE PREFEITO';
+
+UPDATE receitas_candidatos
+SET cargo = '1º SUPLENTE'
+WHERE cargo = '1º SUPLENTE SENADOR';
+
+UPDATE receitas_candidatos
+SET cargo = '2º SUPLENTE'
+WHERE cargo = '2º SUPLENTE SENADOR';
+
+DELETE
+FROM receitas_candidatos
+WHERE valor_receita IS NULL;
+
+DELETE
+FROM receitas_comites
+WHERE valor_receita IS NULL;
+
+DELETE
+FROM receitas_partidos
+WHERE valor_receita IS NULL;
+
+UPDATE
+  candidatos a
+SET
+  a.DATA_NASCIMENTO = CONCAT(LEFT(DATA_NASCIMENTO, 6), '19', RIGHT(DATA_NASCIMENTO, 2))
+WHERE
+  DATA_NASCIMENTO REGEXP '^([0-2][0-9]|3[0-1])/(0[1-9]|1[0-2])/[0-9]{2}$';
+
+UPDATE
+  candidatos a
+SET
+  a.DATA_NASCIMENTO = CONCAT(LEFT(DATA_NASCIMENTO, 4), '19', RIGHT(DATA_NASCIMENTO, 2))
+WHERE
+  DATA_NASCIMENTO REGEXP '^([0-2][0-9]|3[0-1])(0[1-9]|1[0-2])[0-9]{2}$';
+
+UPDATE
+  candidatos a
+SET
+  a.DATA_NASCIMENTO = CONCAT(LEFT(DATA_NASCIMENTO, 7), '19', RIGHT(DATA_NASCIMENTO, 2))
+WHERE
+  DATA_NASCIMENTO REGEXP '^([0-2][0-9]|3[0-1])-.{3}-[0-9]{2}$';
+
+UPDATE
+  candidatos a
+SET
+  a.DATA_NASCIMENTO = CONCAT(LEFT(DATA_NASCIMENTO, 4), '1', RIGHT(DATA_NASCIMENTO, 3))
+WHERE
+  DATA_NASCIMENTO REGEXP '^([0-2][0-9]|3[0-1])(0[1-9]|1[0-2])09[0-9]{2}$';
+
+UPDATE
+  candidatos a
+SET
+  a.DATA_NASCIMENTO = STR_TO_DATE(a.DATA_NASCIMENTO, '%d/%m/%Y')
+WHERE
+  DATA_NASCIMENTO REGEXP '^([0-2][0-9]|3[0-1])/(0[1-9]|1[0-2])/19[0-9]{2}$';
+
+UPDATE
+  candidatos a
+SET
+  a.DATA_NASCIMENTO = CONCAT(LEFT(DATA_NASCIMENTO, 2), '0', RIGHT(DATA_NASCIMENTO, 5))
+WHERE
+  DATA_NASCIMENTO REGEXP '^([0-2][0-9]|3[0-1])[1-9]19[0-9]{2}$';
+
+UPDATE
+  candidatos a
+SET
+  a.DATA_NASCIMENTO = Concat('0', Substr(DATA_NASCIMENTO, 1, 1), '0', Substr(DATA_NASCIMENTO, 3, 1), RIGHT(DATA_NASCIMENTO, 4))
+WHERE
+  DATA_NASCIMENTO REGEXP '^[[:alnum:]]\ [[:alnum:]]\ [[:alnum:]]{4}$';
+
+UPDATE
+  candidatos a
+SET
+  a.DATA_NASCIMENTO = STR_TO_DATE(a.DATA_NASCIMENTO, '%d%m%Y')
+WHERE
+  DATA_NASCIMENTO REGEXP '^([0-2][0-9]|3[0-1])(0[1-9]|1[0-2])19[0-9]{2}$';
+
+UPDATE
+  candidatos a
+SET
+  a.DATA_NASCIMENTO = STR_TO_DATE(a.DATA_NASCIMENTO, '%d-%b-%Y')
+WHERE
+  DATA_NASCIMENTO REGEXP '^[0-9]{1,2}-.{3}-[0-9]{4}$';
+
+CREATE INDEX anodata
+ON candidatos (NOME_CANDIDATO, DATA_NASCIMENTO);
+
+UPDATE
+    candidatos a,
+    candidatos b
+SET
+  a.CPF_CANDIDATO = b.CPF_CANDIDATO
+WHERE
+  a.NOME_CANDIDATO = b.NOME_CANDIDATO AND
+  a.DATA_NASCIMENTO = b.DATA_NASCIMENTO AND
+  a.DATA_NASCIMENTO IS NOT NULL AND
+  a.NOME_CANDIDATO IS NOT NULL AND
+  a.CPF_CANDIDATO IS NULL AND
+  b.CPF_CANDIDATO IS NOT NULL;
+
+DROP INDEX anodata
+ON candidatos;
+
+CREATE INDEX anonome on receitas_candidatos(ano,cargo, nome_candidato);
+CREATE INDEX anonome on candidatos(ANO_ELEICAO,DESCRICAO_CARGO, NOME_CANDIDATO);
+UPDATE
+    receitas_candidatos a,
+    candidatos b
+SET
+  a.cpf_candidato = b.CPF_CANDIDATO
+WHERE
+  a.nome_candidato = b.NOME_CANDIDATO AND
+  a.cargo = b.DESCRICAO_CARGO AND
+  a.ano = b.ANO_ELEICAO AND
+  a.nome_candidato IS NOT NULL AND
+  a.cpf_candidato IS NULL AND
+  b.CPF_CANDIDATO IS NOT NULL;
+DROP INDEX anonome on receitas_candidatos;
+DROP INDEX anonome on candidatos;
+
+Delete
+FROM receitas_candidatos
+WHERE cpf_cnpj_doador IS NULL;
+
+Delete
+FROM receitas_comites
+WHERE cpf_cnpj_doador IS NULL;
+
+Delete
+FROM receitas_partidos
+WHERE cpf_cnpj_doador IS NULL;
